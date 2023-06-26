@@ -4,12 +4,12 @@ const BadRequestError = require('../utils/BadRequestError');
 const createUser = (req, res, next) => {
   const { name, about, avatar } = req.body;
   User.create({ name, about, avatar })
-    .then(() => {
-      res.status(200).send({ message: 'Пользователь успешно создан' });
+    .then((user) => {
+      res.status(200).send({ message: 'Пользователь успешно создан', name: user.name, about: user.about, _id:user._id, avatar: user.avatar});
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res.status(400).json({ message: 'Переданы невалидные данные' })
+        res.status(400).send({ message: 'Переданы невалидные данные' })
       } else {
         next(err);
       }

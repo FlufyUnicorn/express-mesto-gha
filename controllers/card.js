@@ -1,16 +1,19 @@
 const Card = require('../models/card');
 const BadRequestError = require('../utils/BadRequestError');
-const NotFoundError = require('../utils/NotFoundError');
 
 const createCard = (req, res, next) => {
   const { name, link } = req.body;
   Card.create({ name, link, owner: req.user._id })
-    .then(() => {
-      res.send({ message: 'Карточка успешно создана' });
+    .then((card) => {
+      const { cardId } = req.params;
+      Card.findById(cardId)
+        .then((data) => {
+          res.status(200).send(data)
+        })
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(new BadRequestError(err.message));
+        res.status(400).send({message: 'Переданы невалидные данные'});
       } else {
         next(err);
       }
@@ -24,11 +27,11 @@ const deleteCard = (req, res, next) => {
       if (!card) {
         res.send({ message: 'Такой карточки нет' });
       }
-      res.send({ message: 'Карточка удалена' });
+      res.status(200).send({ message: 'Карточка удалена' });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        next(new BadRequestError('Переданы невалидные данные'));
+        res.status(400).send({message: 'Переданы невалидные данные'});
       } else {
         next(err);
       }
