@@ -3,12 +3,8 @@ const Card = require('../models/card');
 const createCard = (req, res, next) => {
   const { name, link } = req.body;
   Card.create({ name, link, owner: req.user._id })
-    .then(() => {
-      const { cardId } = req.params;
-      Card.findById(cardId)
-        .then((data) => {
-          res.status(200).send(data);
-        });
+    .then((card) => {
+      res.status(200).send({ name: card.name, link: card.link, _id: card._id });
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
@@ -54,7 +50,7 @@ const likeCard = (req, res, next) => {
       if (!card) {
         res.status(404).send({ message: 'Карточка не найдена' });
       }
-      res.send(card);
+      res.status(200).send(card);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
@@ -72,7 +68,7 @@ const dislikeCard = (req, res, next) => {
       if (!card) {
         res.status(404).send({ message: 'Карточка не найдена' });
       }
-      res.send(card);
+      res.status(200).send(card);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
