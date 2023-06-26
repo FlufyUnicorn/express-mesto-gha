@@ -1,4 +1,5 @@
 const User = require('../models/user')
+const BadRequestError = require("./utils/BadRequestError")
 
 const createUser = (req, res, next) => {
   const {name, about, avatar} = req.body
@@ -7,7 +8,12 @@ const createUser = (req, res, next) => {
       res.send({message: 'Пользователь успешно создан'})
     })
     .catch(err => {
-      next(err)
+      if (err.name === 'CastError') {
+        next(new BadRequestError('Переданы невалидные данные'))
+      }
+      else {
+        next(err)
+      }
     })
 }
 
@@ -17,13 +23,18 @@ const getUser = (req, res, next) => {
     .then(user => {
       if (!user) {
         return res.status(404).json({
-          message: 'Пользователь не найден',
+          message: 'Пользователь не найден'
         })
       }
       res.send(user)
     })
     .catch(err => {
-      next(err)
+      if (err.name ==='CastError') {
+        next(new BadRequestError('Переданы невалидные данные'))
+      }
+      else {
+        next(err)
+      }
     })
 }
 
@@ -44,7 +55,12 @@ const updateProfile = (req, res, next) => {
         res.send(user)
     })
     .catch(err => {
-      next(err)
+      if (err.name === 'ValidationError') {
+        next(new BadRequestError(err.message))
+      }
+      else {
+        next(err)
+      }
     })
 }
 
@@ -55,7 +71,12 @@ const updateAvatar = (req, res, next) => {
       res.send(user)
     })
     .catch(err => {
-      next(err)
+      if (err.name === 'ValidationError') {
+        next(new BadRequestError(err.message))
+      }
+      else {
+        next(err)
+      }
     })
 }
 
