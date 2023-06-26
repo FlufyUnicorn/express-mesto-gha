@@ -1,15 +1,16 @@
 const User = require('../models/user');
-const BadRequestError = require('../utils/BadRequestError');
 
 const createUser = (req, res, next) => {
   const { name, about, avatar } = req.body;
   User.create({ name, about, avatar })
     .then((user) => {
-      res.status(200).send({ message: 'Пользователь успешно создан', name: user.name, about: user.about, _id:user._id, avatar: user.avatar});
+      res.status(200).send({
+        message: 'Пользователь успешно создан', name: user.name, about: user.about, _id: user._id, avatar: user.avatar,
+      });
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
-        res.status(400).send({ message: 'Переданы невалидные данные' })
+      if (err.name === 'CastError' || err.name === 'ValidationError') {
+        res.status(400).send({ message: 'Переданы невалидные данные' });
       } else {
         next(err);
       }
@@ -21,13 +22,13 @@ const getUser = (req, res, next) => {
   User.findById(userId)
     .then((user) => {
       if (!user) {
-        return res.status(404).json({ message: 'Пользователь не найден' });
+        res.status(404).send({ message: 'Пользователь не найден' });
       }
       res.send(user);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res.status(400).json({ message: 'Переданы невалидные данные' })
+        res.status(400).send({ message: 'Переданы невалидные данные' });
       } else {
         next(err);
       }
@@ -52,7 +53,7 @@ const updateProfile = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(400).json({message: 'Переданы невалидные данные'});
+        res.status(400).send({ message: 'Переданы невалидные данные' });
       } else {
         next(err);
       }
@@ -67,10 +68,9 @@ const updateAvatar = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(400).json({message: 'Переданы невалидные данные'});
-      } else {
-        next(err);
+        res.status(400).send({ message: 'Переданы невалидные данные' });
       }
+      next(err);
     });
 };
 

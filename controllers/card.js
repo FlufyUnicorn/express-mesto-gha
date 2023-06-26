@@ -1,19 +1,18 @@
 const Card = require('../models/card');
-const BadRequestError = require('../utils/BadRequestError');
 
 const createCard = (req, res, next) => {
   const { name, link } = req.body;
   Card.create({ name, link, owner: req.user._id })
-    .then((card) => {
+    .then(() => {
       const { cardId } = req.params;
       Card.findById(cardId)
         .then((data) => {
-          res.status(200).send(data)
-        })
+          res.status(200).send(data);
+        });
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(400).send({message: 'Переданы невалидные данные'});
+        res.status(400).send({ message: 'Переданы невалидные данные' });
       } else {
         next(err);
       }
@@ -25,13 +24,13 @@ const deleteCard = (req, res, next) => {
   Card.findByIdAndRemove(cardId)
     .then((card) => {
       if (!card) {
-        res.send({ message: 'Такой карточки нет' });
+        res.status(404).send({ message: 'Такой карточки нет' });
       }
       res.status(200).send({ message: 'Карточка удалена' });
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
-        res.status(400).send({message: 'Переданы невалидные данные'});
+      if (err.name === 'CastError' || err.name === 'ValidationError') {
+        res.status(400).send({ message: 'Переданы невалидные данные' });
       } else {
         next(err);
       }
@@ -53,13 +52,13 @@ const likeCard = (req, res, next) => {
   Card.findByIdAndUpdate(cardId, { $addToSet: { likes: req.user._id } }, { new: true })
     .then((card) => {
       if (!card) {
-        return res.status(404).json({ message: 'Карточка не найдена' });
+        res.status(404).send({ message: 'Карточка не найдена' });
       }
       res.send(card);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res.status(400).json({message: 'Переданы невалидные данные'});
+        res.status(400).send({ message: 'Переданы невалидные данные' });
       } else {
         next(err);
       }
@@ -71,13 +70,13 @@ const dislikeCard = (req, res, next) => {
   Card.findByIdAndUpdate(cardId, { $pull: { likes: req.user._id } }, { new: true })
     .then((card) => {
       if (!card) {
-        return res.status(404).json({ message: 'Карточка не найдена' });
+        res.status(404).send({ message: 'Карточка не найдена' });
       }
       res.send(card);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res.status(400).json({message: 'Переданы невалидные данные'});
+        res.status(400).send({ message: 'Переданы невалидные данные' });
       } else {
         next(err);
       }
