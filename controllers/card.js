@@ -73,7 +73,7 @@ const dislikeCard = (req, res) => {
       if (!card) {
         res.status(NOT_FOUND_ERROR_CODE).send({ message: 'Карточка не найдена' });
       } else {
-        res.status.send(card);
+        res.send(card);
       }
     })
     .catch((err) => {
