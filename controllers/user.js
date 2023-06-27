@@ -44,7 +44,7 @@ const getAllUsers = (req, res) => {
     .then((user) => {
       res.send(user);
     })
-    .catch((err) => {
+    .catch(() => {
       res.status(DEFAULT_ERROR_CODE).send({ message: 'Ошибка' });
     });
 };
