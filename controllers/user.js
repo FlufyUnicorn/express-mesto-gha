@@ -1,23 +1,39 @@
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const {
   NOT_FOUND_ERROR_CODE, DEFAULT_ERROR_CODE, INCORRECT_DATA_ERROR_CODE, SUCCESS_CREATED_CODE,
 } = require('../utils/constants');
 
 const createUser = (req, res) => {
-  const { name, about, avatar } = req.body;
-  User.create({ name, about, avatar })
-    .then((user) => {
-      res.status(SUCCESS_CREATED_CODE).send({
-        name: user.name, about: user.about, _id: user._id, avatar: user.avatar,
-      });
-    })
-    .catch((err) => {
-      if (err.name === 'CastError' || err.name === 'ValidationError') {
-        res.status(INCORRECT_DATA_ERROR_CODE).send({ message: 'Переданы невалидные данные' });
-      } else {
-        res.status(DEFAULT_ERROR_CODE).send({ message: 'Ошибка' });
-      }
-    });
+  const {
+    name, about, avatar, email, password,
+  } = req.body;
+  bcrypt.hash(password, 10)
+    .then((hash) => User.create(
+      {
+        name, about, avatar, email, password: hash,
+      },
+    )
+      .then((user) => {
+        res.status(SUCCESS_CREATED_CODE).send(
+          {
+            name: user.name,
+            about: user.about,
+            _id: user._id,
+            avatar: user.avatar,
+            email: user.email,
+            password: user.password,
+          },
+        );
+      })
+      .catch((err) => {
+        if (err.name === 'CastError' || err.name === 'ValidationError') {
+          res.status(INCORRECT_DATA_ERROR_CODE).send({ message: 'Переданы невалидные данные' });
+        } else {
+          res.status(DEFAULT_ERROR_CODE).send({ message: 'Ошибка' });
+        }
+      }));
 };
 
 const getUser = (req, res) => {
@@ -78,10 +94,23 @@ const updateAvatar = (req, res) => {
     });
 };
 
+const login = (req, res) => {
+  const { email, password } = req.body;
+  return User.findUserByCredentials(email, password)
+    .then((user) => {
+      const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' });
+      res.send({ token });
+    })
+    .catch((err) => {
+      res.status(401).send({ message: err.message });
+    });
+};
+
 module.exports = {
   createUser,
   getAllUsers,
   getUser,
   updateAvatar,
   updateProfile,
+  login,
 };
