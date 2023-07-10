@@ -1,31 +1,26 @@
 const bcrypt = require('bcryptjs');
+// eslint-disable-next-line import/no-extraneous-dependencies
 const jwt = require('jsonwebtoken');
+
 const User = require('../models/user');
 const {
   NOT_FOUND_ERROR_CODE, DEFAULT_ERROR_CODE, INCORRECT_DATA_ERROR_CODE, SUCCESS_CREATED_CODE,
 } = require('../utils/constants');
 
 const createUser = (req, res) => {
+  console.log(req.body);
   const {
     name, about, avatar, email, password,
   } = req.body;
+
   bcrypt.hash(password, 10)
     .then((hash) => User.create(
       {
         name, about, avatar, email, password: hash,
       },
     )
-      .then((user) => {
-        res.status(SUCCESS_CREATED_CODE).send(
-          {
-            name: user.name,
-            about: user.about,
-            _id: user._id,
-            avatar: user.avatar,
-            email: user.email,
-            password: user.password,
-          },
-        );
+      .then(() => {
+        res.status(SUCCESS_CREATED_CODE).send({ message: 'Пользователь успешно создан' });
       })
       .catch((err) => {
         if (err.name === 'CastError' || err.name === 'ValidationError') {
@@ -96,7 +91,7 @@ const updateAvatar = (req, res) => {
 
 const login = (req, res) => {
   const { email, password } = req.body;
-  return User.findUserByCredentials(email, password)
+  return User.checkUser(email, password)
     .then((user) => {
       const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' });
       res.send({ token });
