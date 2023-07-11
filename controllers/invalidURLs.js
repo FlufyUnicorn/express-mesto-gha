@@ -1,9 +1,7 @@
-const {
-  NOT_FOUND_ERROR_CODE,
-} = require('../utils/constants');
+const NotFoundError = require('../utils/errors/NotFoundError');
 
-function getInvalidURL(req, res) {
-  res.status(NOT_FOUND_ERROR_CODE).send({ message: 'Такой страницы не существует' });
+function getInvalidURL() {
+  throw new NotFoundError('Запрашиваемый адрес не найден. Проверьте URL и метод запроса');
 }
 
 module.exports = { getInvalidURL };
