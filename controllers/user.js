@@ -20,8 +20,10 @@ const createUser = (req, res, next) => {
         name, about, avatar, email, password: hash,
       },
     )
-      .then(() => {
-        res.status(SUCCESS_CREATED_CODE).send({ message: 'Пользователь успешно создан' });
+      .then((user) => {
+        res.status(SUCCESS_CREATED_CODE).send({
+          name: user.name, about: user.about, avatar: user.avatar, email: user.email,
+        });
       })
       .catch((err) => {
         if (err.code === 11000) {
@@ -100,8 +102,17 @@ const login = (req, res, next) => {
       res.send({ token });
     })
     .catch((err) => {
+      console.log(err);
       next(err);
     });
+};
+
+const getMe = (req, res, next) => {
+  User.findOne({ _id: req.user._id })
+    .then((user) => {
+      res.send(user);
+    })
+    .catch((err) => next(err));
 };
 
 module.exports = {
@@ -111,4 +122,5 @@ module.exports = {
   updateAvatar,
   updateProfile,
   login,
+  getMe,
 };
