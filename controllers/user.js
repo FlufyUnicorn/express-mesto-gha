@@ -102,7 +102,6 @@ const login = (req, res, next) => {
       res.send({ token });
     })
     .catch((err) => {
-      console.log(err);
       next(err);
     });
 };
@@ -110,9 +109,13 @@ const login = (req, res, next) => {
 const getMe = (req, res, next) => {
   User.findOne({ _id: req.user._id })
     .then((user) => {
+      console.log('here in');
       res.send(user);
     })
-    .catch((err) => next(err));
+    .catch((err) => {
+      console.log('here');
+      next(err);
+    });
 };
 
 module.exports = {
