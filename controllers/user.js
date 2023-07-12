@@ -5,9 +5,7 @@ const {
 const BadRequestError = require('../utils/errors/BadRequestError');
 
 const getUser = (req, res, next) => {
-  console.log('im here');
   const { id } = req.params;
-  console.log(req.params, 'id');
   User.findById(id)
     .then((user) => {
       if (!user) {
@@ -65,8 +63,6 @@ const updateAvatar = (req, res, next) => {
 };
 
 const getMe = (req, res, next) => {
-  console.log('ya tut');
-
   User.findOne({ _id: req.user._id })
     .then((user) => {
       res.send(user);
