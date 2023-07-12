@@ -24,6 +24,7 @@ const createCard = (req, res, next) => {
 const deleteCard = (req, res, next) => {
   const { cardId } = req.params;
   Card.findById(cardId)
+    // eslint-disable-next-line consistent-return
     .then((card) => {
       if (!card) {
         return new NotFoundError('Карточка не найдена');
@@ -58,6 +59,7 @@ const getAllCards = (req, res, next) => {
 const likeCard = (req, res, next) => {
   const { cardId } = req.params;
   Card.findByIdAndUpdate(cardId, { $addToSet: { likes: req.user._id } }, { new: true })
+    // eslint-disable-next-line consistent-return
     .then((card) => {
       if (!card) {
         return new NotFoundError('Карточка не найдена');
