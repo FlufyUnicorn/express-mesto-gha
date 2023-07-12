@@ -23,14 +23,14 @@ const createCard = (req, res, next) => {
 
 const deleteCard = (req, res, next) => {
   const { cardId } = req.params;
-  Card.findById(cardId)
+  return Card.findById(cardId)
     // eslint-disable-next-line consistent-return
     .then((card) => {
       if (!card) {
-        return new NotFoundError('Карточка не найдена');
+        throw new NotFoundError('Карточка не найдена');
       }
       if (card.owner.toString() !== req.params.cardId) {
-        return new ForbiddenError('Нельзя удалять чужие карточки');
+        return next(new ForbiddenError('Нельзя удалять чужие карточки'));
       }
       Card.findByIdAndRemove(cardId)
         .then(() => {
