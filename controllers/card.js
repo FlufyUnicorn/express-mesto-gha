@@ -1,6 +1,6 @@
 const Card = require('../models/card');
 const {
-  NOT_FOUND_ERROR_CODE, SUCCESS_CREATED_CODE,
+  SUCCESS_CREATED_CODE,
 } = require('../utils/constants');
 const BadRequestError = require('../utils/errors/BadRequestError');
 const NotFoundError = require('../utils/errors/NotFoundError');
@@ -57,21 +57,18 @@ const getAllCards = (req, res, next) => {
 };
 
 const likeCard = (req, res, next) => {
-  const { cardId } = req.params;
-  Card.findByIdAndUpdate(cardId, { $addToSet: { likes: req.user._id } }, { new: true })
-    // eslint-disable-next-line consistent-return
+  Card.findByIdAndUpdate(req.params.cardId, { $addToSet: { likes: req.user._id } }, { new: true })
     .then((card) => {
       if (!card) {
-        return new NotFoundError('Карточка не найдена');
+        throw new NotFoundError('Карточка не найдена');
       }
       res.send(card);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        next(new BadRequestError('Переданы не валидные данные'));
-      } else {
-        next(err);
+        return next(new BadRequestError('Переданы невалидные данные'));
       }
+      return next(err);
     });
 };
 
@@ -80,17 +77,16 @@ const dislikeCard = (req, res, next) => {
   Card.findByIdAndUpdate(cardId, { $pull: { likes: req.user._id } }, { new: true })
     .then((card) => {
       if (!card) {
-        res.status(NOT_FOUND_ERROR_CODE).send({ message: 'Карточка не найдена' });
+        throw new NotFoundError('Карточка не найдена');
       } else {
         res.send(card);
       }
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        next(new BadRequestError('Переданы не валидные данные'));
-      } else {
-        next(err);
+        return next(new BadRequestError('Переданы не валидные данные'));
       }
+      return next(err);
     });
 };
 
