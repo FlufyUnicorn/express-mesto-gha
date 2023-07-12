@@ -1,40 +1,8 @@
-const bcrypt = require('bcryptjs');
-// eslint-disable-next-line import/no-extraneous-dependencies
-const jwt = require('jsonwebtoken');
-
 const User = require('../models/user');
 const {
-  NOT_FOUND_ERROR_CODE, SUCCESS_CREATED_CODE,
+  NOT_FOUND_ERROR_CODE,
 } = require('../utils/constants');
 const BadRequestError = require('../utils/errors/BadRequestError');
-const ConflictError = require('../utils/errors/ConflictError');
-
-const createUser = (req, res, next) => {
-  const {
-    name, about, avatar, email, password,
-  } = req.body;
-
-  bcrypt.hash(password, 10)
-    .then((hash) => User.create(
-      {
-        name, about, avatar, email, password: hash,
-      },
-    )
-      .then((user) => {
-        res.status(SUCCESS_CREATED_CODE).send({
-          name: user.name, about: user.about, avatar: user.avatar, email: user.email,
-        });
-      })
-      .catch((err) => {
-        if (err.code === 11000) {
-          next(new ConflictError('Пользователь с данным email уже зарегистрирован'));
-        } else if (err.name === 'CastError' || err.name === 'ValidationError') {
-          next(new BadRequestError('Переданы не валидные данные'));
-        } else {
-          next(err);
-        }
-      }));
-};
 
 const getUser = (req, res, next) => {
   const { userId } = req.params;
@@ -94,36 +62,22 @@ const updateAvatar = (req, res, next) => {
     });
 };
 
-const login = (req, res, next) => {
-  const { email, password } = req.body;
-  return User.checkUser(email, password)
-    .then((user) => {
-      const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' });
-      res.send({ token });
-    })
-    .catch((err) => {
-      next(err);
-    });
-};
-
 const getMe = (req, res, next) => {
+  console.log('ya tut');
+
   User.findOne({ _id: req.user._id })
     .then((user) => {
-      console.log('here in');
       res.send(user);
     })
     .catch((err) => {
-      console.log('here');
       next(err);
     });
 };
 
 module.exports = {
-  createUser,
   getAllUsers,
   getUser,
   updateAvatar,
   updateProfile,
-  login,
   getMe,
 };
