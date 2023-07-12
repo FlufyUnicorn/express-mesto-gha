@@ -5,8 +5,10 @@ const {
 const BadRequestError = require('../utils/errors/BadRequestError');
 
 const getUser = (req, res, next) => {
-  const { userId } = req.params;
-  User.findById(userId)
+  console.log('im here');
+  const { id } = req.params;
+  console.log(req.params, 'id');
+  User.findById(id)
     .then((user) => {
       if (!user) {
         res.status(NOT_FOUND_ERROR_CODE).send({ message: 'Пользователь не найден' });
