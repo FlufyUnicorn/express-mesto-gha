@@ -10,10 +10,10 @@ const { login, createUser } = require('./controllers/auth');
 const { validateLogin, validateRegister } = require('./utils/validators/userValidator');
 const errorsHandler = require('./middlewares/errorHandler');
 
-const { PORT = 3000 } = process.env;
+const { PORT = 3000, DB_URL = 'mongodb://localhost:27017/mestodb' } = process.env;
 const app = express();
 app.use(bodyParser.json());
-moongose.connect('mongodb://localhost:27017/mestodb');
+moongose.connect(DB_URL);
 
 app.post('/signin', validateLogin, login);
 app.post('/signup', validateRegister, createUser);
